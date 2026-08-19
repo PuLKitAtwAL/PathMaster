@@ -217,7 +217,7 @@ Built with C++ and SDL3.
 
 
 
-!\[PathMaster UI](assets/pathmaster-ui-clean.png)
+!\[PathMaster UI](assets/pathmaster-ui.png)
 
 
 
