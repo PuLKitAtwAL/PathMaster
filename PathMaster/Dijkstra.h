@@ -1,14 +1,18 @@
 #pragma once
 
 #include "Grid.h"
+
 #include <vector>
 #include <utility>
 
 class Dijkstra
 {
 private:
-    std::vector<std::pair<int, int>> visitedOrder;
-    std::vector<std::pair<int, int>> path;
+    std::vector<std::pair<int, int>>
+        visitedOrder;
+
+    std::vector<std::pair<int, int>>
+        path;
 
 public:
     bool solve(const Grid& grid);

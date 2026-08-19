@@ -2,16 +2,28 @@
 
 #include <SDL3/SDL.h>
 #include <vector>
-#include <utility>
 
-enum class CellType
+enum class TerrainType
 {
-    EMPTY,
-    WALL,
+    GRASS,
+    MUD,
+    WATER,
+    WALL
+};
+
+enum class CellState
+{
+    NORMAL,
     START,
     TARGET,
     VISITED,
     PATH
+};
+
+struct Cell
+{
+    TerrainType terrain;
+    CellState state;
 };
 
 class Grid
@@ -21,7 +33,7 @@ private:
     int cols;
     int cellSize;
 
-    std::vector<std::vector<CellType>> cells;
+    std::vector<std::vector<Cell>> cells;
 
     int startRow;
     int startCol;
@@ -29,15 +41,43 @@ private:
     int targetRow;
     int targetCol;
 
+    void drawCircle(
+        SDL_Renderer* renderer,
+        float centerX,
+        float centerY,
+        float radius
+    );
+
+    void drawDigit(
+        SDL_Renderer* renderer,
+        int digit,
+        int x,
+        int y,
+        int size
+    );
+
+    void drawNumber(
+        SDL_Renderer* renderer,
+        int number,
+        int x,
+        int y
+    );
+
 public:
     Grid(int rows, int cols, int cellSize);
 
     void draw(SDL_Renderer* renderer);
 
     void handleLeftClick(int row, int col);
-    void handleRightClick(int row, int col, bool shiftPressed);
+
+    void handleRightClick(
+        int row,
+        int col,
+        bool shiftPressed
+    );
 
     bool isValidCell(int row, int col) const;
+
     bool isWall(int row, int col) const;
 
     int getRows() const;
@@ -49,11 +89,33 @@ public:
     int getTargetRow() const;
     int getTargetCol() const;
 
+    int getWeight(int row, int col) const;
+
+    TerrainType getTerrain(
+        int row,
+        int col
+    ) const;
+
+    void setTerrain(
+        int row,
+        int col,
+        TerrainType terrain
+    );
+
     void clearSearch();
 
     void markVisited(int row, int col);
+
     void markPath(int row, int col);
 
-    void setCell(int row, int col, CellType type);
-    CellType getCell(int row, int col) const;
+    void clearAll();
+
+    void generateRandomMaze(
+        unsigned int seed
+    );
+
+    Cell getCell(
+        int row,
+        int col
+    ) const;
 };

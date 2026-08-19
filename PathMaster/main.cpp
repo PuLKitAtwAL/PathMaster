@@ -3,6 +3,8 @@
 #include <iostream>
 #include <string>
 #include <vector>
+#include <random>
+#include <chrono>
 
 #include "Grid.h"
 #include "BFS.h"
@@ -101,6 +103,16 @@ int main(int argc, char* argv[])
         CELL_SIZE
     );
 
+    // Random number generator
+    std::mt19937 rng(
+        static_cast<unsigned int>(
+            std::chrono::high_resolution_clock::
+            now()
+            .time_since_epoch()
+            .count()
+            )
+    );
+
     bool running = true;
 
     SDL_Event event;
@@ -109,6 +121,10 @@ int main(int argc, char* argv[])
     {
         while (SDL_PollEvent(&event))
         {
+            // -------------------------
+            // QUIT
+            // -------------------------
+
             if (event.type ==
                 SDL_EVENT_QUIT)
             {
@@ -138,30 +154,40 @@ int main(int argc, char* argv[])
                 int row =
                     mouseY / CELL_SIZE;
 
-                if (event.button.button ==
-                    SDL_BUTTON_LEFT)
+                // Make sure click is
+                // actually inside grid
+                if (row >= 0 &&
+                    row < ROWS &&
+                    col >= 0 &&
+                    col < COLS)
                 {
-                    grid.handleLeftClick(
-                        row,
-                        col
-                    );
-                }
+                    // LEFT CLICK = WALL
+                    if (event.button.button ==
+                        SDL_BUTTON_LEFT)
+                    {
+                        grid.handleLeftClick(
+                            row,
+                            col
+                        );
+                    }
 
-                if (event.button.button ==
-                    SDL_BUTTON_RIGHT)
-                {
-                    SDL_Keymod modifiers =
-                        SDL_GetModState();
+                    // RIGHT CLICK
+                    if (event.button.button ==
+                        SDL_BUTTON_RIGHT)
+                    {
+                        SDL_Keymod modifiers =
+                            SDL_GetModState();
 
-                    bool shiftPressed =
-                        (modifiers &
-                            SDL_KMOD_SHIFT) != 0;
+                        bool shiftPressed =
+                            (modifiers &
+                                SDL_KMOD_SHIFT) != 0;
 
-                    grid.handleRightClick(
-                        row,
-                        col,
-                        shiftPressed
-                    );
+                        grid.handleRightClick(
+                            row,
+                            col,
+                            shiftPressed
+                        );
+                    }
                 }
             }
 
@@ -172,7 +198,10 @@ int main(int argc, char* argv[])
             if (event.type ==
                 SDL_EVENT_KEY_DOWN)
             {
+                // =====================
                 // SPACE = BFS
+                // =====================
+
                 if (event.key.key ==
                     SDLK_SPACE)
                 {
@@ -214,7 +243,10 @@ int main(int argc, char* argv[])
                         << "\n";
                 }
 
-                // D = Dijkstra
+                // =====================
+                // D = DIJKSTRA
+                // =====================
+
                 if (event.key.key ==
                     SDLK_D)
                 {
@@ -256,7 +288,10 @@ int main(int argc, char* argv[])
                         << "\n";
                 }
 
+                // =====================
                 // A = A*
+                // =====================
+
                 if (event.key.key ==
                     SDLK_A)
                 {
@@ -298,11 +333,53 @@ int main(int argc, char* argv[])
                         << "\n";
                 }
 
-                // R = reset search
+                // =====================
+                // R = CLEAR SEARCH
+                // =====================
+
                 if (event.key.key ==
                     SDLK_R)
                 {
                     grid.clearSearch();
+
+                    std::cout
+                        << "Search cleared.\n";
+                }
+
+                // =====================
+                // C = COMPLETE RESET
+                // =====================
+
+                if (event.key.key ==
+                    SDLK_C)
+                {
+                    grid.clearAll();
+
+                    std::cout
+                        << "Grid reset.\n";
+                }
+
+                // =====================
+                // N = NEW RANDOM MAZE
+                // =====================
+
+                if (event.key.key ==
+                    SDLK_N)
+                {
+                    unsigned int seed =
+                        rng();
+
+                    grid.generateRandomMaze(
+                        seed
+                    );
+
+                    std::cout
+                        << "\nNew random maze generated.\n";
+
+                    std::cout
+                        << "Seed: "
+                        << seed
+                        << "\n";
                 }
             }
         }

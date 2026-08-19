@@ -13,23 +13,26 @@ struct AStarNode
     int row;
     int col;
 
-    bool operator>(const AStarNode& other) const
+    bool operator>(
+        const AStarNode& other) const
     {
         return f > other.f;
     }
 };
 
-int heuristic(
+static int heuristic(
     int row,
     int col,
     int targetRow,
     int targetCol)
 {
-    return std::abs(row - targetRow) +
+    return
+        std::abs(row - targetRow) +
         std::abs(col - targetCol);
 }
 
-bool AStar::solve(const Grid& grid)
+bool AStar::solve(
+    const Grid& grid)
 {
     visitedOrder.clear();
     path.clear();
@@ -37,26 +40,38 @@ bool AStar::solve(const Grid& grid)
     int rows = grid.getRows();
     int cols = grid.getCols();
 
-    int startRow = grid.getStartRow();
-    int startCol = grid.getStartCol();
+    int startRow =
+        grid.getStartRow();
 
-    int targetRow = grid.getTargetRow();
-    int targetCol = grid.getTargetCol();
+    int startCol =
+        grid.getStartCol();
 
-    const int INF = std::numeric_limits<int>::max();
+    int targetRow =
+        grid.getTargetRow();
 
-    std::vector<std::vector<int>> gScore(
-        rows,
-        std::vector<int>(cols, INF)
-    );
+    int targetCol =
+        grid.getTargetCol();
 
-    std::vector<std::vector<std::pair<int, int>>> parent(
-        rows,
-        std::vector<std::pair<int, int>>(
-            cols,
-            { -1, -1 }
-        )
-    );
+    const int INF =
+        std::numeric_limits<int>::max();
+
+    std::vector<std::vector<int>>
+        gScore(
+            rows,
+            std::vector<int>(
+                cols,
+                INF
+            )
+        );
+
+    std::vector<std::vector<std::pair<int, int>>>
+        parent(
+            rows,
+            std::vector<std::pair<int, int>>(
+                cols,
+                { -1, -1 }
+            )
+        );
 
     std::priority_queue<
         AStarNode,
@@ -88,7 +103,9 @@ bool AStar::solve(const Grid& grid)
 
     while (!pq.empty())
     {
-        AStarNode current = pq.top();
+        AStarNode current =
+            pq.top();
+
         pq.pop();
 
         if (current.g !=
@@ -108,37 +125,57 @@ bool AStar::solve(const Grid& grid)
             break;
         }
 
-        for (auto& direction : directions)
+        for (auto& direction :
+            directions)
         {
             int newRow =
-                current.row + direction[0];
+                current.row +
+                direction[0];
 
             int newCol =
-                current.col + direction[1];
+                current.col +
+                direction[1];
 
-            if (!grid.isValidCell(newRow, newCol))
-                continue;
-
-            if (grid.isWall(newRow, newCol))
-                continue;
-
-            int newG = current.g + 1;
-
-            if (newG < gScore[newRow][newCol])
+            if (!grid.isValidCell(
+                newRow,
+                newCol))
             {
-                gScore[newRow][newCol] = newG;
+                continue;
+            }
 
-                parent[newRow][newCol] = {
+            if (grid.isWall(
+                newRow,
+                newCol))
+            {
+                continue;
+            }
+
+            int newG =
+                current.g +
+                grid.getWeight(
+                    newRow,
+                    newCol
+                );
+
+            if (newG <
+                gScore[newRow][newCol])
+            {
+                gScore[newRow][newCol] =
+                    newG;
+
+                parent[newRow][newCol] =
+                {
                     current.row,
                     current.col
                 };
 
-                int h = heuristic(
-                    newRow,
-                    newCol,
-                    targetRow,
-                    targetCol
-                );
+                int h =
+                    heuristic(
+                        newRow,
+                        newCol,
+                        targetRow,
+                        targetCol
+                    );
 
                 pq.push({
                     newG + h,
@@ -150,8 +187,11 @@ bool AStar::solve(const Grid& grid)
         }
     }
 
-    if (gScore[targetRow][targetCol] == INF)
+    if (gScore[targetRow][targetCol] ==
+        INF)
+    {
         return false;
+    }
 
     int row = targetRow;
     int col = targetCol;
@@ -159,17 +199,27 @@ bool AStar::solve(const Grid& grid)
     while (!(row == startRow &&
         col == startCol))
     {
-        path.push_back({ row, col });
+        path.push_back({
+            row,
+            col
+            });
 
-        auto parentCell = parent[row][col];
+        auto parentCell =
+            parent[row][col];
 
         row = parentCell.first;
         col = parentCell.second;
     }
 
-    path.push_back({ startRow, startCol });
+    path.push_back({
+        startRow,
+        startCol
+        });
 
-    std::reverse(path.begin(), path.end());
+    std::reverse(
+        path.begin(),
+        path.end()
+    );
 
     return true;
 }
