@@ -1,6 +1,7 @@
 #include "BFS.h"
 
 #include <queue>
+#include <vector>
 #include <algorithm>
 
 bool BFS::solve(const Grid& grid)
@@ -11,109 +12,84 @@ bool BFS::solve(const Grid& grid)
     int rows = grid.getRows();
     int cols = grid.getCols();
 
-    int startRow = grid.getStartRow();
-    int startCol = grid.getStartCol();
+    int sr = grid.getStartRow();
+    int sc = grid.getStartCol();
+    int tr = grid.getTargetRow();
+    int tc = grid.getTargetCol();
 
-    int targetRow = grid.getTargetRow();
-    int targetCol = grid.getTargetCol();
+    std::queue<std::pair<int, int>> q;
 
     std::vector<std::vector<bool>> visited(
-        rows,
-        std::vector<bool>(cols, false)
+        rows, std::vector<bool>(cols, false)
     );
 
     std::vector<std::vector<std::pair<int, int>>> parent(
         rows,
-        std::vector<std::pair<int, int>>(
-            cols,
-            { -1, -1 }
-        )
+        std::vector<std::pair<int, int>>(cols, {-1, -1})
     );
 
-    std::queue<std::pair<int, int>> q;
+    q.push({sr, sc});
+    visited[sr][sc] = true;
 
-    q.push({ startRow, startCol });
-    visited[startRow][startCol] = true;
-
-    int directions[4][2] =
-    {
-        {-1, 0},
-        {1, 0},
-        {0, -1},
-        {0, 1}
+    const int dirs[4][2] = {
+        {-1, 0}, {1, 0}, {0, -1}, {0, 1}
     };
 
     while (!q.empty())
     {
-        auto current = q.front();
+        auto [r, c] = q.front();
         q.pop();
 
-        int row = current.first;
-        int col = current.second;
+        visitedOrder.push_back({r, c});
 
-        visitedOrder.push_back({ row, col });
-
-        if (row == targetRow && col == targetCol)
-        {
+        if (r == tr && c == tc)
             break;
-        }
 
-        for (auto& direction : directions)
+        for (const auto& d : dirs)
         {
-            int newRow = row + direction[0];
-            int newCol = col + direction[1];
+            int nr = r + d[0];
+            int nc = c + d[1];
 
-            if (!grid.isValidCell(newRow, newCol))
+            if (!grid.isValidCell(nr, nc) ||
+                grid.isWall(nr, nc) ||
+                visited[nr][nc])
+            {
                 continue;
+            }
 
-            if (visited[newRow][newCol])
-                continue;
-
-            if (grid.isWall(newRow, newCol))
-                continue;
-
-            visited[newRow][newCol] = true;
-
-            parent[newRow][newCol] =
-            { row, col };
-
-            q.push({ newRow, newCol });
+            visited[nr][nc] = true;
+            parent[nr][nc] = {r, c};
+            q.push({nr, nc});
         }
     }
 
-    if (!visited[targetRow][targetCol])
-    {
+    if (!visited[tr][tc])
         return false;
-    }
 
-    int row = targetRow;
-    int col = targetCol;
+    int r = tr;
+    int c = tc;
 
-    while (!(row == startRow && col == startCol))
+    while (!(r == sr && c == sc))
     {
-        path.push_back({ row, col });
+        path.push_back({r, c});
 
-        auto parentCell = parent[row][col];
-
-        row = parentCell.first;
-        col = parentCell.second;
+        auto p = parent[r][c];
+        r = p.first;
+        c = p.second;
     }
 
-    path.push_back({ startRow, startCol });
-
+    path.push_back({sr, sc});
     std::reverse(path.begin(), path.end());
 
     return true;
 }
 
-const std::vector<std::pair<int, int>>&
-BFS::getVisitedOrder() const
+const std::vector<std::pair<int, int>>& BFS::getVisitedOrder() const
 {
     return visitedOrder;
 }
 
-const std::vector<std::pair<int, int>>&
-BFS::getPath() const
+const std::vector<std::pair<int, int>>& BFS::getPath() const
 {
     return path;
 }

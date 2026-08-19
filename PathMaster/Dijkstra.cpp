@@ -5,136 +5,117 @@
 #include <algorithm>
 #include <limits>
 
-using Node = std::pair<int, std::pair<int, int>>;
+struct DijkstraNode
+{
+    int distance;
+    int row;
+    int col;
+
+    bool operator>(const DijkstraNode& other) const
+    {
+        return distance > other.distance;
+    }
+};
 
 bool Dijkstra::solve(const Grid& grid)
 {
     visitedOrder.clear();
     path.clear();
 
-    int rows = grid.getRows();
-    int cols = grid.getCols();
+    const int rows = grid.getRows();
+    const int cols = grid.getCols();
 
-    int startRow = grid.getStartRow();
-    int startCol = grid.getStartCol();
-
-    int targetRow = grid.getTargetRow();
-    int targetCol = grid.getTargetCol();
+    const int sr = grid.getStartRow();
+    const int sc = grid.getStartCol();
+    const int tr = grid.getTargetRow();
+    const int tc = grid.getTargetCol();
 
     const int INF = std::numeric_limits<int>::max();
 
-    std::vector<std::vector<int>> distance(
-        rows,
-        std::vector<int>(cols, INF)
+    std::vector<std::vector<int>> dist(
+        rows, std::vector<int>(cols, INF)
     );
 
     std::vector<std::vector<std::pair<int, int>>> parent(
         rows,
-        std::vector<std::pair<int, int>>(
-            cols,
-            { -1, -1 }
-        )
+        std::vector<std::pair<int, int>>(cols, {-1, -1})
     );
 
     std::priority_queue<
-        Node,
-        std::vector<Node>,
-        std::greater<Node>
+        DijkstraNode,
+        std::vector<DijkstraNode>,
+        std::greater<DijkstraNode>
     > pq;
 
-    distance[startRow][startCol] = 0;
+    dist[sr][sc] = 0;
+    pq.push({0, sr, sc});
 
-    pq.push({
-        0,
-        {startRow, startCol}
-        });
-
-    int directions[4][2] =
-    {
-        {-1, 0},
-        {1, 0},
-        {0, -1},
-        {0, 1}
+    const int dirs[4][2] = {
+        {-1, 0}, {1, 0}, {0, -1}, {0, 1}
     };
 
     while (!pq.empty())
     {
-        auto current = pq.top();
+        DijkstraNode cur = pq.top();
         pq.pop();
 
-        int currentDistance = current.first;
-        int row = current.second.first;
-        int col = current.second.second;
-
-        if (currentDistance != distance[row][col])
+        if (cur.distance != dist[cur.row][cur.col])
             continue;
 
-        visitedOrder.push_back({ row, col });
+        visitedOrder.push_back({cur.row, cur.col});
 
-        if (row == targetRow && col == targetCol)
+        if (cur.row == tr && cur.col == tc)
             break;
 
-        for (auto& direction : directions)
+        for (const auto& d : dirs)
         {
-            int newRow = row + direction[0];
-            int newCol = col + direction[1];
+            int nr = cur.row + d[0];
+            int nc = cur.col + d[1];
 
-            if (!grid.isValidCell(newRow, newCol))
+            if (!grid.isValidCell(nr, nc) || grid.isWall(nr, nc))
                 continue;
 
-            if (grid.isWall(newRow, newCol))
-                continue;
+            int nd = cur.distance + grid.getWeight(nr, nc);
 
-            int newDistance =
-                currentDistance + 1;
-
-            if (newDistance < distance[newRow][newCol])
+            if (nd < dist[nr][nc])
             {
-                distance[newRow][newCol] =
-                    newDistance;
-
-                parent[newRow][newCol] =
-                { row, col };
-
-                pq.push({
-                    newDistance,
-                    {newRow, newCol}
-                    });
+                dist[nr][nc] = nd;
+                parent[nr][nc] = {cur.row, cur.col};
+                pq.push({nd, nr, nc});
             }
         }
     }
 
-    if (distance[targetRow][targetCol] == INF)
+    if (dist[tr][tc] == INF)
         return false;
 
-    int row = targetRow;
-    int col = targetCol;
+    int r = tr;
+    int c = tc;
 
-    while (!(row == startRow && col == startCol))
+    while (!(r == sr && c == sc))
     {
-        path.push_back({ row, col });
+        path.push_back({r, c});
 
-        auto parentCell = parent[row][col];
+        auto p = parent[r][c];
+        if (p.first == -1)
+            return false;
 
-        row = parentCell.first;
-        col = parentCell.second;
+        r = p.first;
+        c = p.second;
     }
 
-    path.push_back({ startRow, startCol });
-
+    path.push_back({sr, sc});
     std::reverse(path.begin(), path.end());
 
     return true;
 }
 
-const std::vector<std::pair<int, int>>&
-Dijkstra::getVisitedOrder() const
+const std::vector<std::pair<int, int>>& Dijkstra::getVisitedOrder() const
 {
     return visitedOrder;
 }
 
-const std::vector<std::pair<int, int>>&
-Dijkstra::getPath() const
+const std::vector<std::pair<int, int>>& Dijkstra::getPath() const
 {
     return path;
 }

@@ -19,14 +19,9 @@ struct AStarNode
     }
 };
 
-int heuristic(
-    int row,
-    int col,
-    int targetRow,
-    int targetCol)
+static int heuristic(int r, int c, int tr, int tc)
 {
-    return std::abs(row - targetRow) +
-        std::abs(col - targetCol);
+    return std::abs(r - tr) + std::abs(c - tc);
 }
 
 bool AStar::solve(const Grid& grid)
@@ -34,28 +29,23 @@ bool AStar::solve(const Grid& grid)
     visitedOrder.clear();
     path.clear();
 
-    int rows = grid.getRows();
-    int cols = grid.getCols();
+    const int rows = grid.getRows();
+    const int cols = grid.getCols();
 
-    int startRow = grid.getStartRow();
-    int startCol = grid.getStartCol();
-
-    int targetRow = grid.getTargetRow();
-    int targetCol = grid.getTargetCol();
+    const int sr = grid.getStartRow();
+    const int sc = grid.getStartCol();
+    const int tr = grid.getTargetRow();
+    const int tc = grid.getTargetCol();
 
     const int INF = std::numeric_limits<int>::max();
 
     std::vector<std::vector<int>> gScore(
-        rows,
-        std::vector<int>(cols, INF)
+        rows, std::vector<int>(cols, INF)
     );
 
     std::vector<std::vector<std::pair<int, int>>> parent(
         rows,
-        std::vector<std::pair<int, int>>(
-            cols,
-            { -1, -1 }
-        )
+        std::vector<std::pair<int, int>>(cols, {-1, -1})
     );
 
     std::priority_queue<
@@ -64,124 +54,89 @@ bool AStar::solve(const Grid& grid)
         std::greater<AStarNode>
     > pq;
 
-    gScore[startRow][startCol] = 0;
+    gScore[sr][sc] = 0;
 
     pq.push({
-        heuristic(
-            startRow,
-            startCol,
-            targetRow,
-            targetCol
-        ),
+        heuristic(sr, sc, tr, tc),
         0,
-        startRow,
-        startCol
-        });
+        sr,
+        sc
+    });
 
-    int directions[4][2] =
-    {
-        {-1, 0},
-        {1, 0},
-        {0, -1},
-        {0, 1}
+    const int dirs[4][2] = {
+        {-1, 0}, {1, 0}, {0, -1}, {0, 1}
     };
 
     while (!pq.empty())
     {
-        AStarNode current = pq.top();
+        AStarNode cur = pq.top();
         pq.pop();
 
-        if (current.g !=
-            gScore[current.row][current.col])
-        {
+        if (cur.g != gScore[cur.row][cur.col])
             continue;
-        }
 
-        visitedOrder.push_back({
-            current.row,
-            current.col
-            });
+        visitedOrder.push_back({cur.row, cur.col});
 
-        if (current.row == targetRow &&
-            current.col == targetCol)
-        {
+        if (cur.row == tr && cur.col == tc)
             break;
-        }
 
-        for (auto& direction : directions)
+        for (const auto& d : dirs)
         {
-            int newRow =
-                current.row + direction[0];
+            int nr = cur.row + d[0];
+            int nc = cur.col + d[1];
 
-            int newCol =
-                current.col + direction[1];
-
-            if (!grid.isValidCell(newRow, newCol))
+            if (!grid.isValidCell(nr, nc) || grid.isWall(nr, nc))
                 continue;
 
-            if (grid.isWall(newRow, newCol))
-                continue;
+            int newG = cur.g + grid.getWeight(nr, nc);
 
-            int newG = current.g + 1;
-
-            if (newG < gScore[newRow][newCol])
+            if (newG < gScore[nr][nc])
             {
-                gScore[newRow][newCol] = newG;
+                gScore[nr][nc] = newG;
+                parent[nr][nc] = {cur.row, cur.col};
 
-                parent[newRow][newCol] = {
-                    current.row,
-                    current.col
-                };
-
-                int h = heuristic(
-                    newRow,
-                    newCol,
-                    targetRow,
-                    targetCol
-                );
+                int h = heuristic(nr, nc, tr, tc);
 
                 pq.push({
                     newG + h,
                     newG,
-                    newRow,
-                    newCol
-                    });
+                    nr,
+                    nc
+                });
             }
         }
     }
 
-    if (gScore[targetRow][targetCol] == INF)
+    if (gScore[tr][tc] == INF)
         return false;
 
-    int row = targetRow;
-    int col = targetCol;
+    int r = tr;
+    int c = tc;
 
-    while (!(row == startRow &&
-        col == startCol))
+    while (!(r == sr && c == sc))
     {
-        path.push_back({ row, col });
+        path.push_back({r, c});
 
-        auto parentCell = parent[row][col];
+        auto p = parent[r][c];
+        if (p.first == -1)
+            return false;
 
-        row = parentCell.first;
-        col = parentCell.second;
+        r = p.first;
+        c = p.second;
     }
 
-    path.push_back({ startRow, startCol });
-
+    path.push_back({sr, sc});
     std::reverse(path.begin(), path.end());
 
     return true;
 }
 
-const std::vector<std::pair<int, int>>&
-AStar::getVisitedOrder() const
+const std::vector<std::pair<int, int>>& AStar::getVisitedOrder() const
 {
     return visitedOrder;
 }
 
-const std::vector<std::pair<int, int>>&
-AStar::getPath() const
+const std::vector<std::pair<int, int>>& AStar::getPath() const
 {
     return path;
 }

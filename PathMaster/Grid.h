@@ -2,16 +2,28 @@
 
 #include <SDL3/SDL.h>
 #include <vector>
-#include <utility>
 
-enum class CellType
+enum class TerrainType
 {
-    EMPTY,
-    WALL,
+    GRASS,
+    MUD,
+    WATER,
+    WALL
+};
+
+enum class CellState
+{
+    NORMAL,
     START,
     TARGET,
     VISITED,
     PATH
+};
+
+struct Cell
+{
+    TerrainType terrain;
+    CellState state;
 };
 
 class Grid
@@ -21,13 +33,14 @@ private:
     int cols;
     int cellSize;
 
-    std::vector<std::vector<CellType>> cells;
+    std::vector<std::vector<Cell>> cells;
 
     int startRow;
     int startCol;
-
     int targetRow;
     int targetCol;
+
+    void drawCircle(SDL_Renderer* renderer, float centerX, float centerY, float radius);
 
 public:
     Grid(int rows, int cols, int cellSize);
@@ -49,11 +62,17 @@ public:
     int getTargetRow() const;
     int getTargetCol() const;
 
-    void clearSearch();
+    int getWeight(int row, int col) const;
+    TerrainType getTerrain(int row, int col) const;
 
+    void setTerrain(int row, int col, TerrainType terrain);
+
+    void clearSearch();
     void markVisited(int row, int col);
     void markPath(int row, int col);
+    void clearAll();
 
-    void setCell(int row, int col, CellType type);
-    CellType getCell(int row, int col) const;
+    void generateRandomMaze(unsigned int seed);
+
+    Cell getCell(int row, int col) const;
 };
