@@ -1,11 +1,6 @@
 #include "Grid.h"
 
 #include <random>
-#include <algorithm>
-
-// ============================================================
-// CONSTRUCTOR
-// ============================================================
 
 Grid::Grid(int rows, int cols, int cellSize)
 {
@@ -15,14 +10,16 @@ Grid::Grid(int rows, int cols, int cellSize)
 
     cells.resize(rows);
 
-    for (int row = 0; row < rows; row++)
+    for (int r = 0; r < rows; r++)
     {
-        cells[row].resize(cols);
+        cells[r].resize(cols);
 
-        for (int col = 0; col < cols; col++)
+        for (int c = 0; c < cols; c++)
         {
-            cells[row][col].terrain = TerrainType::GRASS;
-            cells[row][col].state = CellState::NORMAL;
+            cells[r][c] = {
+                TerrainType::GRASS,
+                CellState::NORMAL
+            };
         }
     }
 
@@ -36,29 +33,16 @@ Grid::Grid(int rows, int cols, int cellSize)
     cells[targetRow][targetCol].state = CellState::TARGET;
 }
 
-// ============================================================
-// VALIDATION
-// ============================================================
-
 bool Grid::isValidCell(int row, int col) const
 {
-    return row >= 0 &&
-        row < rows &&
-        col >= 0 &&
-        col < cols;
+    return row >= 0 && row < rows && col >= 0 && col < cols;
 }
 
 bool Grid::isWall(int row, int col) const
 {
-    if (!isValidCell(row, col))
-        return true;
-
-    return cells[row][col].terrain == TerrainType::WALL;
+    return !isValidCell(row, col) ||
+           cells[row][col].terrain == TerrainType::WALL;
 }
-
-// ============================================================
-// WEIGHTS
-// ============================================================
 
 int Grid::getWeight(int row, int col) const
 {
@@ -67,17 +51,10 @@ int Grid::getWeight(int row, int col) const
 
     switch (cells[row][col].terrain)
     {
-    case TerrainType::GRASS:
-        return 1;
-
-    case TerrainType::MUD:
-        return 5;
-
-    case TerrainType::WATER:
-        return 10;
-
-    case TerrainType::WALL:
-        return 1000000;
+    case TerrainType::GRASS: return 1;
+    case TerrainType::MUD:   return 5;
+    case TerrainType::WATER: return 10;
+    case TerrainType::WALL:  return 1000000;
     }
 
     return 1;
@@ -91,27 +68,18 @@ TerrainType Grid::getTerrain(int row, int col) const
     return cells[row][col].terrain;
 }
 
-void Grid::setTerrain(
-    int row,
-    int col,
-    TerrainType terrain)
+void Grid::setTerrain(int row, int col, TerrainType terrain)
 {
     if (!isValidCell(row, col))
         return;
 
     if ((row == startRow && col == startCol) ||
         (row == targetRow && col == targetCol))
-    {
         return;
-    }
 
     cells[row][col].terrain = terrain;
     cells[row][col].state = CellState::NORMAL;
 }
-
-// ============================================================
-// MOUSE
-// ============================================================
 
 void Grid::handleLeftClick(int row, int col)
 {
@@ -120,83 +88,51 @@ void Grid::handleLeftClick(int row, int col)
 
     if ((row == startRow && col == startCol) ||
         (row == targetRow && col == targetCol))
-    {
         return;
-    }
 
     if (cells[row][col].terrain == TerrainType::WALL)
-    {
         cells[row][col].terrain = TerrainType::GRASS;
-    }
     else
-    {
         cells[row][col].terrain = TerrainType::WALL;
-    }
 
     cells[row][col].state = CellState::NORMAL;
 }
 
-void Grid::handleRightClick(
-    int row,
-    int col,
-    bool shiftPressed)
+void Grid::handleRightClick(int row, int col, bool shiftPressed)
 {
     if (!isValidCell(row, col))
         return;
 
-    // SHIFT + RIGHT CLICK = TARGET
     if (shiftPressed)
     {
         if (row == startRow && col == startCol)
             return;
 
-        cells[targetRow][targetCol].state =
-            CellState::NORMAL;
-
-        cells[targetRow][targetCol].terrain =
-            TerrainType::GRASS;
+        cells[targetRow][targetCol].state = CellState::NORMAL;
+        cells[targetRow][targetCol].terrain = TerrainType::GRASS;
 
         targetRow = row;
         targetCol = col;
 
-        cells[targetRow][targetCol].terrain =
-            TerrainType::GRASS;
-
-        cells[targetRow][targetCol].state =
-            CellState::TARGET;
-
+        cells[targetRow][targetCol].terrain = TerrainType::GRASS;
+        cells[targetRow][targetCol].state = CellState::TARGET;
         return;
     }
 
-    // RIGHT CLICK = START
     if (row == targetRow && col == targetCol)
         return;
 
-    cells[startRow][startCol].state =
-        CellState::NORMAL;
-
-    cells[startRow][startCol].terrain =
-        TerrainType::GRASS;
+    cells[startRow][startCol].state = CellState::NORMAL;
+    cells[startRow][startCol].terrain = TerrainType::GRASS;
 
     startRow = row;
     startCol = col;
 
-    cells[startRow][startCol].terrain =
-        TerrainType::GRASS;
-
-    cells[startRow][startCol].state =
-        CellState::START;
+    cells[startRow][startCol].terrain = TerrainType::GRASS;
+    cells[startRow][startCol].state = CellState::START;
 }
 
-// ============================================================
-// DRAW CIRCLE
-// ============================================================
-
-void Grid::drawCircle(
-    SDL_Renderer* renderer,
-    float centerX,
-    float centerY,
-    float radius)
+void Grid::drawCircle(SDL_Renderer* renderer, float cx, float cy, float radius)
 {
     int r = static_cast<int>(radius);
 
@@ -206,166 +142,64 @@ void Grid::drawCircle(
         {
             if (x * x + y * y <= r * r)
             {
-                SDL_FRect pixel;
-
-                pixel.x =
-                    centerX + static_cast<float>(x);
-
-                pixel.y =
-                    centerY + static_cast<float>(y);
-
-                pixel.w = 1.0f;
-                pixel.h = 1.0f;
-
-                SDL_RenderFillRect(
-                    renderer,
-                    &pixel
-                );
+                SDL_FRect p{
+                    cx + static_cast<float>(x),
+                    cy + static_cast<float>(y),
+                    1.0f,
+                    1.0f
+                };
+                SDL_RenderFillRect(renderer, &p);
             }
         }
     }
 }
 
-// ============================================================
-// DRAW GRID
-// ============================================================
-
 void Grid::draw(SDL_Renderer* renderer)
 {
-    for (int row = 0; row < rows; row++)
+    for (int r = 0; r < rows; r++)
     {
-        for (int col = 0; col < cols; col++)
+        for (int c = 0; c < cols; c++)
         {
-            SDL_FRect cell;
+            SDL_FRect cell{
+                static_cast<float>(c * cellSize),
+                static_cast<float>(r * cellSize),
+                static_cast<float>(cellSize),
+                static_cast<float>(cellSize)
+            };
 
-            cell.x =
-                static_cast<float>(
-                    col * cellSize
-                    );
+            // Simple base
+            SDL_SetRenderDrawColor(renderer, 52, 52, 58, 255);
+            SDL_RenderFillRect(renderer, &cell);
 
-            cell.y =
-                static_cast<float>(
-                    row * cellSize
-                    );
-
-            cell.w =
-                static_cast<float>(cellSize);
-
-            cell.h =
-                static_cast<float>(cellSize);
-
-            // ------------------------------------------------
-            // NORMAL OPEN CELL
-            // ------------------------------------------------
-
-            SDL_SetRenderDrawColor(
-                renderer,
-                55,
-                55,
-                60,
-                255
-            );
-
-            SDL_RenderFillRect(
-                renderer,
-                &cell
-            );
-
-            // ------------------------------------------------
-            // WALL
-            // ------------------------------------------------
-
-            if (cells[row][col].terrain ==
-                TerrainType::WALL)
+            // Walls
+            if (cells[r][c].terrain == TerrainType::WALL)
             {
-                SDL_SetRenderDrawColor(
-                    renderer,
-                    18,
-                    18,
-                    22,
-                    255
-                );
-
-                SDL_RenderFillRect(
-                    renderer,
-                    &cell
-                );
+                SDL_SetRenderDrawColor(renderer, 18, 18, 22, 255);
+                SDL_RenderFillRect(renderer, &cell);
             }
 
-            // ------------------------------------------------
-            // VISITED
-            // ------------------------------------------------
-
-            if (cells[row][col].state ==
-                CellState::VISITED)
+            // Visited
+            if (cells[r][c].state == CellState::VISITED)
             {
-                SDL_SetRenderDrawColor(
-                    renderer,
-                    75,
-                    145,
-                    210,
-                    255
-                );
-
-                SDL_RenderFillRect(
-                    renderer,
-                    &cell
-                );
+                SDL_SetRenderDrawColor(renderer, 75, 145, 210, 255);
+                SDL_RenderFillRect(renderer, &cell);
             }
 
-            // ------------------------------------------------
-            // PATH
-            // ------------------------------------------------
-
-            if (cells[row][col].state ==
-                CellState::PATH)
+            // Final path
+            if (cells[r][c].state == CellState::PATH)
             {
-                SDL_SetRenderDrawColor(
-                    renderer,
-                    235,
-                    200,
-                    50,
-                    255
-                );
-
-                SDL_RenderFillRect(
-                    renderer,
-                    &cell
-                );
+                SDL_SetRenderDrawColor(renderer, 235, 200, 50, 255);
+                SDL_RenderFillRect(renderer, &cell);
             }
 
-            // ------------------------------------------------
-            // GRID BORDER
-            // ------------------------------------------------
+            // Grid
+            SDL_SetRenderDrawColor(renderer, 100, 100, 105, 255);
+            SDL_RenderRect(renderer, &cell);
 
-            SDL_SetRenderDrawColor(
-                renderer,
-                95,
-                95,
-                100,
-                255
-            );
-
-            SDL_RenderRect(
-                renderer,
-                &cell
-            );
-
-            // ------------------------------------------------
-            // START
-            // ------------------------------------------------
-
-            if (cells[row][col].state ==
-                CellState::START)
+            // Start
+            if (cells[r][c].state == CellState::START)
             {
-                SDL_SetRenderDrawColor(
-                    renderer,
-                    40,
-                    230,
-                    100,
-                    255
-                );
-
+                SDL_SetRenderDrawColor(renderer, 40, 230, 100, 255);
                 drawCircle(
                     renderer,
                     cell.x + cell.w / 2.0f,
@@ -374,21 +208,10 @@ void Grid::draw(SDL_Renderer* renderer)
                 );
             }
 
-            // ------------------------------------------------
-            // TARGET
-            // ------------------------------------------------
-
-            if (cells[row][col].state ==
-                CellState::TARGET)
+            // Target
+            if (cells[r][c].state == CellState::TARGET)
             {
-                SDL_SetRenderDrawColor(
-                    renderer,
-                    240,
-                    60,
-                    70,
-                    255
-                );
-
+                SDL_SetRenderDrawColor(renderer, 240, 60, 70, 255);
                 drawCircle(
                     renderer,
                     cell.x + cell.w / 2.0f,
@@ -397,21 +220,10 @@ void Grid::draw(SDL_Renderer* renderer)
                 );
             }
 
-            // ------------------------------------------------
-            // WEIGHT 5
-            // ------------------------------------------------
-
-            if (cells[row][col].terrain ==
-                TerrainType::MUD)
+            // Only show 5 and 10. Normal weight 1 is intentionally blank.
+            if (cells[r][c].terrain == TerrainType::MUD)
             {
-                SDL_SetRenderDrawColor(
-                    renderer,
-                    255,
-                    255,
-                    255,
-                    255
-                );
-
+                SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
                 SDL_RenderDebugText(
                     renderer,
                     cell.x + 16.0f,
@@ -419,22 +231,9 @@ void Grid::draw(SDL_Renderer* renderer)
                     "5"
                 );
             }
-
-            // ------------------------------------------------
-            // WEIGHT 10
-            // ------------------------------------------------
-
-            if (cells[row][col].terrain ==
-                TerrainType::WATER)
+            else if (cells[r][c].terrain == TerrainType::WATER)
             {
-                SDL_SetRenderDrawColor(
-                    renderer,
-                    255,
-                    255,
-                    255,
-                    255
-                );
-
+                SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
                 SDL_RenderDebugText(
                     renderer,
                     cell.x + 10.0f,
@@ -446,401 +245,206 @@ void Grid::draw(SDL_Renderer* renderer)
     }
 }
 
-// ============================================================
-// GETTERS
-// ============================================================
-
-int Grid::getRows() const
-{
-    return rows;
-}
-
-int Grid::getCols() const
-{
-    return cols;
-}
-
-int Grid::getStartRow() const
-{
-    return startRow;
-}
-
-int Grid::getStartCol() const
-{
-    return startCol;
-}
-
-int Grid::getTargetRow() const
-{
-    return targetRow;
-}
-
-int Grid::getTargetCol() const
-{
-    return targetCol;
-}
-
-// ============================================================
-// CLEAR SEARCH
-// ============================================================
+int Grid::getRows() const { return rows; }
+int Grid::getCols() const { return cols; }
+int Grid::getStartRow() const { return startRow; }
+int Grid::getStartCol() const { return startCol; }
+int Grid::getTargetRow() const { return targetRow; }
+int Grid::getTargetCol() const { return targetCol; }
 
 void Grid::clearSearch()
 {
-    for (int row = 0; row < rows; row++)
+    for (auto& row : cells)
     {
-        for (int col = 0; col < cols; col++)
+        for (auto& cell : row)
         {
-            if (cells[row][col].state ==
-                CellState::VISITED ||
-                cells[row][col].state ==
-                CellState::PATH)
-            {
-                cells[row][col].state =
-                    CellState::NORMAL;
-            }
+            if (cell.state == CellState::VISITED ||
+                cell.state == CellState::PATH)
+                cell.state = CellState::NORMAL;
         }
     }
 
-    cells[startRow][startCol].state =
-        CellState::START;
-
-    cells[targetRow][targetCol].state =
-        CellState::TARGET;
+    cells[startRow][startCol].state = CellState::START;
+    cells[targetRow][targetCol].state = CellState::TARGET;
 }
 
-// ============================================================
-// MARK VISITED
-// ============================================================
-
-void Grid::markVisited(
-    int row,
-    int col)
+void Grid::markVisited(int row, int col)
 {
     if (!isValidCell(row, col))
         return;
 
-    if (cells[row][col].state ==
-        CellState::START ||
-        cells[row][col].state ==
-        CellState::TARGET)
-    {
+    if (cells[row][col].state == CellState::START ||
+        cells[row][col].state == CellState::TARGET)
         return;
-    }
 
-    cells[row][col].state =
-        CellState::VISITED;
+    cells[row][col].state = CellState::VISITED;
 }
 
-// ============================================================
-// MARK PATH
-// ============================================================
-
-void Grid::markPath(
-    int row,
-    int col)
+void Grid::markPath(int row, int col)
 {
     if (!isValidCell(row, col))
         return;
 
-    if (cells[row][col].state ==
-        CellState::START ||
-        cells[row][col].state ==
-        CellState::TARGET)
-    {
+    if (cells[row][col].state == CellState::START ||
+        cells[row][col].state == CellState::TARGET)
         return;
-    }
 
-    cells[row][col].state =
-        CellState::PATH;
+    cells[row][col].state = CellState::PATH;
 }
-
-// ============================================================
-// CLEAR EVERYTHING
-// ============================================================
 
 void Grid::clearAll()
 {
-    for (int row = 0; row < rows; row++)
+    for (auto& row : cells)
     {
-        for (int col = 0; col < cols; col++)
+        for (auto& cell : row)
         {
-            cells[row][col].terrain =
-                TerrainType::GRASS;
-
-            cells[row][col].state =
-                CellState::NORMAL;
+            cell.terrain = TerrainType::GRASS;
+            cell.state = CellState::NORMAL;
         }
     }
 
     startRow = 1;
     startCol = 1;
-
     targetRow = rows - 2;
     targetCol = cols - 2;
 
-    cells[startRow][startCol].state =
-        CellState::START;
-
-    cells[targetRow][targetCol].state =
-        CellState::TARGET;
+    cells[startRow][startCol].state = CellState::START;
+    cells[targetRow][targetCol].state = CellState::TARGET;
 }
 
-// ============================================================
-// RANDOM MAZE
-// ============================================================
-
-void Grid::generateRandomMaze(
-    unsigned int seed)
+void Grid::generateRandomMaze(unsigned int seed)
 {
     std::mt19937 rng(seed);
 
-    // ------------------------------------------------
-    // START WITH EVERYTHING AS WALL
-    // ------------------------------------------------
-
-    for (int row = 0; row < rows; row++)
+    // Start with walls.
+    for (auto& row : cells)
     {
-        for (int col = 0; col < cols; col++)
+        for (auto& cell : row)
         {
-            cells[row][col].terrain =
-                TerrainType::WALL;
-
-            cells[row][col].state =
-                CellState::NORMAL;
+            cell.terrain = TerrainType::WALL;
+            cell.state = CellState::NORMAL;
         }
     }
 
     startRow = 1;
     startCol = 1;
-
     targetRow = rows - 2;
     targetCol = cols - 2;
 
-    // ------------------------------------------------
-    // PATH 1
-    // ------------------------------------------------
+    // Main top-then-right route.
+    int r = startRow;
+    int c = startCol;
 
-    int row = startRow;
-    int col = startCol;
+    cells[r][c].terrain = TerrainType::GRASS;
 
-    cells[row][col].terrain =
-        TerrainType::GRASS;
-
-    while (col < targetCol)
+    while (c < targetCol)
     {
-        col++;
-
-        cells[row][col].terrain =
-            TerrainType::GRASS;
+        ++c;
+        cells[r][c].terrain = TerrainType::GRASS;
     }
 
-    while (row < targetRow)
+    while (r < targetRow)
     {
-        row++;
-
-        cells[row][col].terrain =
-            TerrainType::GRASS;
+        ++r;
+        cells[r][c].terrain = TerrainType::GRASS;
     }
 
-    // ------------------------------------------------
-    // PATH 2
-    // ------------------------------------------------
+    // Second route: down, then right.
+    r = startRow;
+    c = startCol;
 
-    row = startRow;
-    col = startCol;
-
-    while (row < targetRow)
+    while (r < targetRow)
     {
-        row++;
-
-        cells[row][col].terrain =
-            TerrainType::GRASS;
+        ++r;
+        cells[r][c].terrain = TerrainType::GRASS;
     }
 
-    while (col < targetCol)
+    while (c < targetCol)
     {
-        col++;
-
-        cells[row][col].terrain =
-            TerrainType::GRASS;
+        ++c;
+        cells[r][c].terrain = TerrainType::GRASS;
     }
 
-    // ------------------------------------------------
-    // PATH 3
-    // ------------------------------------------------
+    // Third route: a middle detour.
+    r = startRow;
+    c = startCol;
 
-    row = startRow;
-    col = startCol;
-
-    while (col < 4 && col < targetCol)
+    while (c < 4 && c < targetCol)
     {
-        col++;
-
-        cells[row][col].terrain =
-            TerrainType::GRASS;
+        ++c;
+        cells[r][c].terrain = TerrainType::GRASS;
     }
 
-    while (row < targetRow)
+    while (r < targetRow)
     {
-        row++;
-
-        cells[row][col].terrain =
-            TerrainType::GRASS;
+        ++r;
+        cells[r][c].terrain = TerrainType::GRASS;
     }
 
-    while (col < targetCol)
+    while (c < targetCol)
     {
-        col++;
-
-        cells[row][col].terrain =
-            TerrainType::GRASS;
+        ++c;
+        cells[r][c].terrain = TerrainType::GRASS;
     }
 
-    // ------------------------------------------------
-    // ADD A FEW RANDOM OPEN CONNECTIONS
-    // ------------------------------------------------
+    // Add a few natural connections.
+    std::uniform_int_distribution<int> rd(1, rows - 2);
+    std::uniform_int_distribution<int> cd(1, cols - 2);
 
-    std::uniform_int_distribution<int> rowDist(
-        1,
-        rows - 2
-    );
-
-    std::uniform_int_distribution<int> colDist(
-        1,
-        cols - 2
-    );
-
-    for (int i = 0; i < 8; i++)
+    for (int i = 0; i < 12; i++)
     {
-        int r = rowDist(rng);
-        int c = colDist(rng);
+        int rr = rd(rng);
+        int cc = cd(rng);
 
-        if (cells[r][c].terrain !=
-            TerrainType::WALL)
-        {
+        if (cells[rr][cc].terrain != TerrainType::WALL)
             continue;
-        }
 
         int neighbours = 0;
 
-        if (r > 0 &&
-            cells[r - 1][c].terrain !=
-            TerrainType::WALL)
-        {
-            neighbours++;
-        }
-
-        if (r < rows - 1 &&
-            cells[r + 1][c].terrain !=
-            TerrainType::WALL)
-        {
-            neighbours++;
-        }
-
-        if (c > 0 &&
-            cells[r][c - 1].terrain !=
-            TerrainType::WALL)
-        {
-            neighbours++;
-        }
-
-        if (c < cols - 1 &&
-            cells[r][c + 1].terrain !=
-            TerrainType::WALL)
-        {
-            neighbours++;
-        }
+        if (rr > 0 && cells[rr - 1][cc].terrain != TerrainType::WALL) neighbours++;
+        if (rr + 1 < rows && cells[rr + 1][cc].terrain != TerrainType::WALL) neighbours++;
+        if (cc > 0 && cells[rr][cc - 1].terrain != TerrainType::WALL) neighbours++;
+        if (cc + 1 < cols && cells[rr][cc + 1].terrain != TerrainType::WALL) neighbours++;
 
         if (neighbours >= 2)
-        {
-            cells[r][c].terrain =
-                TerrainType::GRASS;
-        }
+            cells[rr][cc].terrain = TerrainType::GRASS;
     }
 
-    // ------------------------------------------------
-    // ADD ONLY A FEW WEIGHTED CELLS
-    // ------------------------------------------------
+    // Add a few 5 and 10 cells only on open cells.
+    std::uniform_int_distribution<int> chance(0, 99);
+    int weighted = 0;
 
-    std::uniform_int_distribution<int> weightChance(
-        0,
-        99
-    );
-
-    int weightedCells = 0;
-
-    for (int attempts = 0;
-        attempts < 100 &&
-        weightedCells < 5;
-        attempts++)
+    for (int attempts = 0; attempts < 150 && weighted < 6; attempts++)
     {
-        int r = rowDist(rng);
-        int c = colDist(rng);
+        int rr = rd(rng);
+        int cc = cd(rng);
 
-        if (cells[r][c].terrain !=
-            TerrainType::GRASS)
-        {
+        if (cells[rr][cc].terrain != TerrainType::GRASS)
             continue;
-        }
 
-        if ((r == startRow &&
-            c == startCol) ||
-            (r == targetRow &&
-                c == targetCol))
-        {
+        if ((rr == startRow && cc == startCol) ||
+            (rr == targetRow && cc == targetCol))
             continue;
-        }
 
-        if (weightChance(rng) < 65)
-        {
-            cells[r][c].terrain =
-                TerrainType::MUD;
-        }
-        else
-        {
-            cells[r][c].terrain =
-                TerrainType::WATER;
-        }
+        cells[rr][cc].terrain =
+            (chance(rng) < 65)
+            ? TerrainType::MUD
+            : TerrainType::WATER;
 
-        weightedCells++;
+        weighted++;
     }
 
-    // ------------------------------------------------
-    // RESTORE START
-    // ------------------------------------------------
+    cells[startRow][startCol].terrain = TerrainType::GRASS;
+    cells[startRow][startCol].state = CellState::START;
 
-    cells[startRow][startCol].terrain =
-        TerrainType::GRASS;
-
-    cells[startRow][startCol].state =
-        CellState::START;
-
-    // ------------------------------------------------
-    // RESTORE TARGET
-    // ------------------------------------------------
-
-    cells[targetRow][targetCol].terrain =
-        TerrainType::GRASS;
-
-    cells[targetRow][targetCol].state =
-        CellState::TARGET;
+    cells[targetRow][targetCol].terrain = TerrainType::GRASS;
+    cells[targetRow][targetCol].state = CellState::TARGET;
 }
 
-// ============================================================
-// GET CELL
-// ============================================================
-
-Cell Grid::getCell(
-    int row,
-    int col) const
+Cell Grid::getCell(int row, int col) const
 {
     if (!isValidCell(row, col))
-    {
-        return {
-            TerrainType::WALL,
-            CellState::NORMAL
-        };
-    }
+        return { TerrainType::WALL, CellState::NORMAL };
 
     return cells[row][col];
 }
