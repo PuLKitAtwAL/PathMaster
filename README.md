@@ -217,7 +217,7 @@ Built with C++ and SDL3.
 
 
 
-!\[PathMaster UI](assets/pathmaster-ui.png)
+![PathMaster UI](https://raw.githubusercontent.com/PuLKitAtwAL/PathMaster/animation/assets/pathmaster-ui.png)
 
 
 
@@ -225,7 +225,7 @@ Built with C++ and SDL3.
 
 
 
-!\[A\* Visualization](assets/pathmaster-ui-astar.png)
+![A* Visualization](https://raw.githubusercontent.com/PuLKitAtwAL/PathMaster/animation/assets/pathmaster-ui-astar.png)
 
 
 
@@ -233,5 +233,5 @@ Built with C++ and SDL3.
 
 
 
-!\[Algorithm Comparison](assets/pathmaster-comparison.png)
+![Algorithm Comparison](https://raw.githubusercontent.com/PuLKitAtwAL/PathMaster/animation/assets/pathmaster-comparison.png)
 
