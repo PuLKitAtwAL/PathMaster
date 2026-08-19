@@ -1,4 +1,4 @@
-# PathMaster
+﻿# PathMaster
 
 A C++ pathfinding visualizer built with SDL3 that lets you explore and compare **BFS, Dijkstra's Algorithm, and A\*** on randomly generated weighted mazes.
 
@@ -81,20 +81,20 @@ Normal cells have a movement cost of `1`, so `1` is intentionally not displayed.
 
 ### Application buttons
 
-* **BFS** — animate Breadth-First Search
-* **DIJKSTRA** — animate Dijkstra
-* **A STAR** — animate A\*
-* **RUN ALL** — compare the three algorithms in the console
-* **NEW MAZE** — generate another random maze
-* **CLEAR** — clear the current search/path visualization
-* **RESET** — reset the grid
-* **SLOWER / FASTER** — change animation speed
+* **BFS** â€” animate Breadth-First Search
+* **DIJKSTRA** â€” animate Dijkstra
+* **A STAR** â€” animate A\*
+* **RUN ALL** â€” compare the three algorithms in the console
+* **NEW MAZE** â€” generate another random maze
+* **CLEAR** â€” clear the current search/path visualization
+* **RESET** â€” reset the grid
+* **SLOWER / FASTER** â€” change animation speed
 
 ### Grid editing
 
-* **Left click** — toggle a wall
-* **Right click** — move the start node
-* **Shift + Right click** — move the target node
+* **Left click** â€” toggle a wall
+* **Right click** â€” move the start node
+* **Shift + Right click** â€” move the target node
 
 ### Keyboard shortcuts
 
@@ -119,18 +119,18 @@ C = Reset
 
 ```text
 PathMaster/
-├── AStar.cpp
-├── AStar.h
-├── BFS.cpp
-├── BFS.h
-├── Dijkstra.cpp
-├── Dijkstra.h
-├── Grid.cpp
-├── Grid.h
-├── Benchmark.cpp
-├── Benchmark.h
-├── main.cpp
-└── PathMaster.vcxproj
+â”œâ”€â”€ AStar.cpp
+â”œâ”€â”€ AStar.h
+â”œâ”€â”€ BFS.cpp
+â”œâ”€â”€ BFS.h
+â”œâ”€â”€ Dijkstra.cpp
+â”œâ”€â”€ Dijkstra.h
+â”œâ”€â”€ Grid.cpp
+â”œâ”€â”€ Grid.h
+â”œâ”€â”€ Benchmark.cpp
+â”œâ”€â”€ Benchmark.h
+â”œâ”€â”€ main.cpp
+â””â”€â”€ PathMaster.vcxproj
 ```
 
 ## How It Works
@@ -161,7 +161,7 @@ PathMaster.slnx
 in Visual Studio and use:
 
 ```text
-Build → Rebuild Solution
+Build â†’ Rebuild Solution
 ```
 
 Then run the application.
@@ -200,7 +200,7 @@ Possible future additions include:
 
 GitHub: [@PuLKitAtwAL](https://github.com/PuLKitAtwAL)
 
-\---
+---
 
 Built with C++ and SDL3.
 
@@ -213,25 +213,26 @@ Built with C++ and SDL3.
 
 
 
-\### PathMaster UI
+### PathMaster UI
 
 
 
-!\[PathMaster UI](assets/pathmaster-ui.png)
+![PathMaster UI](assets/pathmaster-ui.png)
 
 
 
-\### A\* Visualization
+### A\* Visualization
 
 
 
-!\[A\* Visualization](assets/pathmaster-ui-astar.png)
+![A\* Visualization](assets/pathmaster-ui-astar.png)
 
 
 
-\### Algorithm Comparison
+### Algorithm Comparison
 
 
 
-!\[Algorithm Comparison](assets/pathmaster-comparison.png)
+![Algorithm Comparison](assets/pathmaster-comparison.png)
+
 
