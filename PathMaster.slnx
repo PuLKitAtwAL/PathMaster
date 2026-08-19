@@ -1,0 +1,7 @@
+<Solution>
+  <Configurations>
+    <Platform Name="x64" />
+    <Platform Name="x86" />
+  </Configurations>
+  <Project Path="PathMaster/PathMaster.vcxproj" Id="8a6a7ecd-83d7-4657-aace-5ef70f9ecce6" />
+</Solution>
