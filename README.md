@@ -6,22 +6,22 @@ The project is designed to make pathfinding algorithms easier to understand by s
 
 ## Features
 
-- Visual grid-based maze
-- Random maze generation with multiple possible routes
-- Start and target nodes
-- Four-direction movement
-- Walls and weighted cells
-- Weight `5` and `10` displayed directly on the grid
-- BFS pathfinding
-- Dijkstra's shortest-path algorithm
-- A\* pathfinding with Manhattan-distance heuristic
-- Animated algorithm exploration
-- Adjustable animation speed
-- Clickable algorithm controls
-- Run-all comparison in the console
-- Visited-node and final-path visualization
-- Basic path/visited statistics
-- Manual maze editing
+* Visual grid-based maze
+* Random maze generation with multiple possible routes
+* Start and target nodes
+* Four-direction movement
+* Walls and weighted cells
+* Weight `5` and `10` displayed directly on the grid
+* BFS pathfinding
+* Dijkstra's shortest-path algorithm
+* A\* pathfinding with Manhattan-distance heuristic
+* Animated algorithm exploration
+* Adjustable animation speed
+* Clickable algorithm controls
+* Run-all comparison in the console
+* Visited-node and final-path visualization
+* Basic path/visited statistics
+* Manual maze editing
 
 ## Algorithms
 
@@ -37,16 +37,16 @@ Dijkstra's algorithm considers the cost of reaching each cell, making it suitabl
 
 In PathMaster:
 
-- Normal cell = `1`
-- Weighted cell = `5`
-- Weighted cell = `10`
-- Wall = blocked
+* Normal cell = `1`
+* Weighted cell = `5`
+* Weighted cell = `10`
+* Wall = blocked
 
 **Time complexity:** typically `O((V + E) log V)` with the priority queue implementation used here.
 
-### A*
+### A\*
 
-A* combines the cost already travelled with a heuristic estimate of the remaining distance.
+A\* combines the cost already travelled with a heuristic estimate of the remaining distance.
 
 PathMaster uses the Manhattan-distance heuristic because movement is restricted to four directions.
 
@@ -58,22 +58,22 @@ f(n) = g(n) + h(n)
 
 where:
 
-- `g(n)` = cost from the start
-- `h(n)` = estimated cost to the target
+* `g(n)` = cost from the start
+* `h(n)` = estimated cost to the target
 
 ## Visualization
 
 The grid uses a deliberately simple visual design:
 
-| Element | Meaning |
-|---|---|
-| Green circle | Start |
-| Red circle | Target |
-| Dark cell | Wall |
-| `5` | Movement cost 5 |
-| `10` | Movement cost 10 |
-| Blue | Visited/search area |
-| Yellow | Final path |
+|Element|Meaning|
+|-|-|
+|Green circle|Start|
+|Red circle|Target|
+|Dark cell|Wall|
+|`5`|Movement cost 5|
+|`10`|Movement cost 10|
+|Blue|Visited/search area|
+|Yellow|Final path|
 
 Normal cells have a movement cost of `1`, so `1` is intentionally not displayed.
 
@@ -81,20 +81,20 @@ Normal cells have a movement cost of `1`, so `1` is intentionally not displayed.
 
 ### Application buttons
 
-- **BFS** — animate Breadth-First Search
-- **DIJKSTRA** — animate Dijkstra
-- **A STAR** — animate A*
-- **RUN ALL** — compare the three algorithms in the console
-- **NEW MAZE** — generate another random maze
-- **CLEAR** — clear the current search/path visualization
-- **RESET** — reset the grid
-- **SLOWER / FASTER** — change animation speed
+* **BFS** — animate Breadth-First Search
+* **DIJKSTRA** — animate Dijkstra
+* **A STAR** — animate A\*
+* **RUN ALL** — compare the three algorithms in the console
+* **NEW MAZE** — generate another random maze
+* **CLEAR** — clear the current search/path visualization
+* **RESET** — reset the grid
+* **SLOWER / FASTER** — change animation speed
 
 ### Grid editing
 
-- **Left click** — toggle a wall
-- **Right click** — move the start node
-- **Shift + Right click** — move the target node
+* **Left click** — toggle a wall
+* **Right click** — move the start node
+* **Shift + Right click** — move the target node
 
 ### Keyboard shortcuts
 
@@ -106,14 +106,14 @@ C = Reset
 
 ## Tech Stack
 
-- **C++**
-- **SDL3**
-- **Visual Studio**
-- STL containers and algorithms
-- Priority Queue
-- Breadth-First Search
-- Dijkstra's Algorithm
-- A* Search
+* **C++**
+* **SDL3**
+* **Visual Studio**
+* STL containers and algorithms
+* Priority Queue
+* Breadth-First Search
+* Dijkstra's Algorithm
+* A\* Search
 
 ## Project Structure
 
@@ -146,9 +146,9 @@ PathMaster/
 
 ### Requirements
 
-- Windows
-- Visual Studio 2022 or compatible Visual Studio setup
-- SDL3 development libraries configured for the project
+* Windows
+* Visual Studio 2022 or compatible Visual Studio setup
+* SDL3 development libraries configured for the project
 
 ### Build
 
@@ -170,12 +170,12 @@ Then run the application.
 
 PathMaster was built as a practical way to study graph traversal and shortest-path algorithms rather than only implementing them as console programs.
 
-It focuses on making the differences between BFS, Dijkstra, and A* visible:
+It focuses on making the differences between BFS, Dijkstra, and A\* visible:
 
-- How many cells each algorithm explores
-- How weighted terrain affects path selection
-- How the heuristic changes A*'s search behaviour
-- How different algorithms can reach the same target through different search strategies
+* How many cells each algorithm explores
+* How weighted terrain affects path selection
+* How the heuristic changes A\*'s search behaviour
+* How different algorithms can reach the same target through different search strategies
 
 ## Current Status
 
@@ -187,12 +187,12 @@ The project is actively being improved.
 
 Possible future additions include:
 
-- Side-by-side animated algorithm comparison
-- More advanced maze-generation algorithms
-- Better performance benchmarking
-- Additional pathfinding algorithms
-- Maze save/load
-- Improved UI and visualization controls
+* Side-by-side animated algorithm comparison
+* More advanced maze-generation algorithms
+* Better performance benchmarking
+* Additional pathfinding algorithms
+* Maze save/load
+* Improved UI and visualization controls
 
 ## Author
 
@@ -200,6 +200,38 @@ Possible future additions include:
 
 GitHub: [@PuLKitAtwAL](https://github.com/PuLKitAtwAL)
 
----
+\---
 
 Built with C++ and SDL3.
+
+
+
+
+
+
+## Screenshots
+
+
+
+\### PathMaster UI
+
+
+
+!\[PathMaster UI](assets/pathmaster-ui-clean.png)
+
+
+
+\### A\* Visualization
+
+
+
+!\[A\* Visualization](assets/pathmaster-ui-astar.png)
+
+
+
+\### Algorithm Comparison
+
+
+
+!\[Algorithm Comparison](assets/pathmaster-comparison.png)
+
